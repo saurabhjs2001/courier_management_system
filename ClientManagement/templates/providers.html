@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'main' %}
+<!-- Main Content -->
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+            <h2 class="text-dark fw-bold d-flex align-items-center mb-0">
+                <i class="fas fa-truck me-2 text-primary fs-3"></i>Service Providers
+            </h2>
+            <button class="btn btn btn-outline-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#providerModal">
+                <i class="fas fa-plus me-2"></i>Add New Provider
+            </button>
+        </div>
+
+        <!-- Providers Table -->
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 fw-bold text-primary">All Service Providers</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Provider Name</th>
+                                <th>Contact Person</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for provider in providers %}
+                            <tr>
+                                <td>{{ provider.id }}</td>
+                                <td class="fw-semibold text-dark">{{ provider.name }}</td>
+                                <td>{{ provider.contact_person }}</td>
+                                <td>{{ provider.phone }}</td>
+                                <td>{{ provider.email }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No providers available.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Provider Modal -->
+<div class="modal fade" id="providerModal" tabindex="-1" aria-labelledby="providerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="providerModalLabel">Add New Service Provider</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="/providers">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="providerName" class="form-label fw-semibold">Provider Name *</label>
+                            <input type="text" class="form-control" name="provider_name" id="providerName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="contactPerson" class="form-label fw-semibold">Contact Person *</label>
+                            <input type="text" class="form-control" name="contact_person" id="contactPerson" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="providerPhone" class="form-label fw-semibold">Phone *</label>
+                            <input type="tel" class="form-control" name="phone" id="providerPhone" maxlength="10" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="providerEmail" class="form-label fw-semibold">Email</label>
+                            <input type="email" class="form-control" name="email" id="providerEmail">
+                        </div>
+                    </div>
+                    <div class="mt-4 text-end">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-1"></i>Save Provider
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock 'main' %}

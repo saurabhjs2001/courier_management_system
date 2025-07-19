@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block 'main' %}
+<div class="container mt-4">
+  <form method="post" class="col-md-10 mt-4 mb-4 p-4 mx-auto rounded border shadow">
+    {% csrf_token %}
+    <h5 class="modal-title mb-3"
+            style="display: flex; justify-content: center; font-weight: bolder; font-size: 35px;">Update Shipment</h5>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label>Date</label>
+        <input type="date" name="date" class="form-control" value="{{ shipment.date|date:'Y-m-d' }}" required>
+      </div>
+      <div class="col-md-6">
+        <label>Document No.</label>
+        <input type="text" name="document_no" class="form-control" value="{{ shipment.document_no }}" required>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label>Client</label>
+        <select name="client" class="form-select">
+          {% for client in clients %}
+            <option value="{{ client.name }}" {% if client.id == shipment.client_name.id %}selected{% endif %}>
+              {{ client.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label>Service Provider</label>
+        <select name="service_provider" class="form-select">
+          {% for provider in providers %}
+            <option value="{{ provider.id }}" {% if provider.id == shipment.service_provider.id %}selected{% endif %}>
+              {{ provider.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label>Destination</label>
+        <input type="text" name="destination" class="form-control" value="{{ shipment.destination }}">
+      </div>
+      <div class="col-md-6">
+        <label>Receiver Name</label>
+        <input type="text" name="receiver_name" class="form-control" value="{{ shipment.receiver_name }}">
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <label>Service Type</label>
+        <input type="text" name="service_type" class="form-control" value="{{ shipment.service_type }}">
+      </div>
+      <div class="col-md-4">
+        <label>Item Type</label>
+        <input type="text" name="item_type" class="form-control" value="{{ shipment.item_type }}">
+      </div>
+      <div class="col-md-4">
+        <label>Travel By</label>
+        <input type="text" name="travel_by" class="form-control" value="{{ shipment.travel_by }}">
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <label>Weight (kg)</label>
+        <input type="number" name="weight" class="form-control" value="{{ shipment.weight }}" step="0.01">
+      </div>
+      <div class="col-md-4">
+        <label>PCS</label>
+        <input type="number" name="pcs" class="form-control" value="{{ shipment.pcs }}">
+      </div>
+      <div class="col-md-4">
+        <label>Cost (₹)</label>
+        <input type="number" name="cost" class="form-control" value="{{ shipment.cost }}" step="0.01">
+      </div>
+    </div>
+
+    <div class="text-end">
+      <a href="/showshipments" class="btn btn-secondary">Cancel</a>
+      <button type="submit" class="btn btn-primary">Update Shipment</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

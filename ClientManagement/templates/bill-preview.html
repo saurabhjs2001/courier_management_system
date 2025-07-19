@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'main' %}
+<style media="print">
+  .print-btn, .navbar, .footer, .sidebar, header {
+    display: none !important;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+</style>
+
+<div class="bill-container">
+    <!-- Bill Header -->
+    <div class="row">
+        <div class="row mb-4">
+            <div class="col-6">
+                <h2 class="company-name">Courier Management System</h2>
+                <p class="company-details">
+                    123 Main Street, Mumbai, Maharashtra<br>
+                    Phone: +91-9876543200<br>
+                    Email: info@couriermgmt.com<br>
+                    GST No: 27AABCU9603R1ZX
+                </p>
+            </div>
+            <div class="col-6 text-end">
+                <h1 class="bill-title">TAX INVOICE</h1>
+                <p class="bill-number">Bill #: {{ bill.bill_no }}</p>
+                <p class="bill-date">Date: {{ bill.date|date:"d/m/Y" }}</p>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-6">
+                <h5>Bill To:</h5>
+                <div class="client-details">
+                    <p><strong>{{ bill.client.name }}</strong><br>
+                        {{ bill.client.address|linebreaksbr }}<br>
+                        Phone: {{ bill.client.phone }}<br>
+                        Email: {{ bill.client.email }}<br>
+                        GST No: {{ bill.client.gst_number }}</p>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="bill-summary">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <td>Bill Period:</td>
+                                <td>{{ bill.bill_period_from|date:"d/m/Y" }} - {{ bill.bill_period_to|date:"d/m/Y" }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Payment Terms:</td>
+                                <td>Net 15 days</td>
+                            </tr>
+                            <tr>
+                                <td>Due Date:</td>
+                                <td>{{ bill.date|date:"d/m/Y" }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bill Items -->
+    <div class="bill-items">
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th>S.No</th>
+                    <th>Shipment ID</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Destination</th>
+                    <th>Weight (kg)</th>
+                    <th>Service Provider</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for shipment in bill.shipments.all %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ shipment.document_no }}</td>
+                    <td>{{ shipment.date|date:"d/m/Y" }}</td>
+                    <td>{{ shipment.item_type }} - {{ shipment.service_type }}</td>
+                    <td>{{ shipment.destination }}</td>
+                    <td>{{ shipment.weight }}</td>
+                    <td>{{ shipment.service_provider}}</td>
+                    <td>₹{{ shipment.cost }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bill Summary -->
+    <div class="bill-summary">
+        <div class="row">
+            <div class="col-7">
+                <div class="payment-info">
+                    <h5>Payment Information:</h5>
+                    <p>
+                        <strong>Bank Name:</strong> HDFC Bank<br>
+                        <strong>Account Name:</strong> Courier Management System<br>
+                        <strong>Account Number:</strong> 50200012345678<br>
+                        <strong>IFSC Code:</strong> HDFC0001234<br>
+                        <strong>Branch:</strong> Mumbai Main Branch
+                    </p>
+                    <div class="terms-conditions mt-3">
+                        <h6>Terms & Conditions:</h6>
+                        <ol class="small">
+                            <li>Payment is due within 15 days of invoice date.</li>
+                            <li>Please include invoice number in payment reference.</li>
+                            <li>Late payments are subject to a 2% monthly interest charge.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="col-5">
+                <div class="bill-totals">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td class="text-end"><strong>Subtotal:</strong></td>
+                                <td class="text-end">₹{{ bill.subtotal }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-end"><strong>Fuel Charges:</strong></td>
+                                <td class="text-end">₹{{ bill.fuel_charge }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-end"><strong>Taxable Amount:</strong></td>
+                                <td class="text-end">₹{{ taxable_amount }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-end"><strong>CGST ({{ bill.gst_rate|divisibleby:2 }}%):</strong></td>
+                                <td class="text-end">₹{{ cgst }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-end"><strong>SGST ({{ bill.gst_rate|divisibleby:2 }}%):</strong></td>
+                                <td class="text-end">₹{{ sgst }}</td>
+                            </tr>
+
+
+                            <tr class="table-active">
+                                <td class="text-end"><strong>Total Amount:</strong></td>
+                                <td class="text-end"><strong>₹{{ bill.total_amount }}</strong></td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bill Footer -->
+    <div class="bill-footer mt-4">
+        <div class="row">
+            <div class="col-8">
+                <p class="mb-0"><strong>Amount in words:</strong> {{ amount_in_words }}</p>
+            </div>
+            <div class="col-4 text-end">
+                <div class="signature">
+                    <p class="mb-0">For Courier Management System</p>
+                    <br><br><br>
+                    <p class="mt-2">Authorized Signatory</p>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-4">
+            <p class="thank-you">Thank you for your business!</p>
+            <p class="small">This is a computer-generated invoice and does not require a physical signature.</p>
+        </div>
+    </div>
+</div>
+<button class="btn btn-primary print-btn no-print" onclick="window.print()">
+    <i class="fas fa-print me-1"></i>Print
+</button>
+
+{% endblock 'main' %}

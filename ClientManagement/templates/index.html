@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'main' %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Dashboard Header -->
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <h2 class="text-dark fw-bold"><i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard</h2>
+                <form method="get" class="row g-2 align-items-end">
+                    <div class="col-auto">
+                        <label for="from_date" class="form-label fw-semibold">From</label>
+                        <input type="date" name="from_date" id="from_date" class="form-control form-control-sm shadow-sm" value="{{ from_date|default:'' }}">
+                    </div>
+                    <div class="col-auto">
+                        <label for="to_date" class="form-label fw-semibold">To</label>
+                        <input type="date" name="to_date" id="to_date" class="form-control form-control-sm shadow-sm" value="{{ to_date|default:'' }}">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-sm btn-outline-primary mt-3 shadow-sm">
+                            <i class="fas fa-filter me-1"></i>Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="row g-4" style="margin-left: 5px;">
+            <div class="col-md-4">
+                <a href="/showclients" class="text-decoration-none">
+                    <div class="card border-start border-primary border-4 shadow-sm h-100 hover-shadow">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted text-uppercase small fw-semibold mb-1">Total Clients</div>
+                                <div class="h5 fw-bold text-dark">{{ total_clients }}</div>
+                            </div>
+                            <i class="fas fa-users fa-2x text-primary bg-light p-2 rounded-circle"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="/showshipments" class="text-decoration-none">
+                    <div class="card border-start border-success border-4 shadow-sm h-100 hover-shadow">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted text-uppercase small fw-semibold mb-1">Total Shipments</div>
+                                <div class="h5 fw-bold text-dark">{{ total_shipments }}</div>
+                            </div>
+                            <i class="fas fa-box fa-2x text-success bg-light p-2 rounded-circle"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-4">
+                <a href="#revenue-section" class="text-decoration-none">
+                    <div class="card border-start border-warning border-4 shadow-sm h-100 hover-shadow">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted text-uppercase small fw-semibold mb-1">Total Revenue</div>
+                                <div class="h5 fw-bold text-dark">₹{{ total_revenue }}</div>
+                            </div>
+                            <i class="fas fa-rupee-sign fa-2x text-warning bg-light p-2 rounded-circle"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Provider Chart -->
+        <div class="col-xl-8 mt-4">
+            <div class="card shadow-sm rounded-3">
+                <div class="card-header bg-white fw-bold text-primary">Shipments by Service Provider</div>
+                <div class="card-body">
+                    {% for provider in provider_shipments %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-semibold">{{ provider.name }}</span>
+                            <span class="text-muted small">{{ provider.count }} shipments</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar {{ provider.color }}" style="width: {{ provider.count|floatformat:0 }}%"></div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">No provider data available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Chart -->
+        <div class="col-xl-4 mt-4">
+            <div class="card shadow-sm rounded-3">
+                <div class="card-header bg-white fw-bold text-primary">Revenue by Provider</div>
+                <div class="card-body">
+                    {% for item in revenue_by_provider %}
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="me-2 d-inline-block rounded-circle {{ item.color }}" style="width: 12px; height: 12px;"></span>
+                        <span class="fw-semibold">{{ item.name }}</span>
+                        <span class="ms-auto text-muted small">₹{{ item.revenue }}</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">No revenue data available.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Shipments Table -->
+        <div class="col-12 mt-4">
+            <div class="card shadow-sm rounded-3">
+                <div class="card-header d-flex justify-content-between align-items-center bg-white">
+                    <h6 class="m-0 text-primary fw-bold">Recent Shipments</h6>
+                    <a href="/addshipment" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-plus me-1"></i>Add New Shipment
+                    </a>
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="table table-hover table-striped align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Client Name</th>
+                                <th>Service Provider</th>
+                                <th>Destination</th>
+                                <th>Service Type</th>
+                                <th>Type</th>
+                                <th>Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for shipment in recent_shipments %}
+                            <tr>
+                                <td>{{ shipment.date|date:"d/m/Y" }}</td>
+                                <td class="fw-semibold">{{ shipment.client_name.name }}</td>
+                                <td>{{ shipment.service_provider.name }}</td>
+                                <td>{{ shipment.destination }}</td>
+                                <td>
+                                    {% if shipment.service_type|lower == 'normal' %}
+                                    <span class="badge bg-info">{{ shipment.service_type }}</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark">{{ shipment.service_type }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if shipment.item_type|lower == 'document' %}
+                                    <span class="badge bg-primary">{{ shipment.item_type }}</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">{{ shipment.item_type }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold text-success">₹{{ shipment.cost }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">No recent shipments found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'main' %}
+<form class="col-md-10 mt-4 mb-4 p-4 mx-auto rounded border shadow" method="post">
+    {% csrf_token %}
+    <h5 class="modal-title mb-3" style="display: flex; justify-content: center; font-weight: bolder; font-size: 35px;">
+        Add New Client</h5>
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="clientName" class="form-label">Client Name *</label>
+                <input type="text" name="client_name" class="form-control" id="clientName" required
+                    value="{{ request.POST.client_name }}">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="gstNumber" class="form-label">GST Number *</label>
+                <input type="text" name="gst_number" class="form-control" id="gstNumber" maxlength="15" required
+                    value="{{ request.POST.gst_number }}">
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label for="clientEmail" class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" id="clientEmail" value="{{ request.POST.email }}">
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label for="clientPhone" class="form-label">Phone *</label>
+                <input type="tel" name="client_phone" class="form-control" id="clientPhone" maxlength="10" required
+                    value="{{ request.POST.client_phone }}">
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label for="clientfuilCharges" class="form-label">Fuil_Charge *</label>
+                <input type="number" name="client_fuilCharge" class="form-control" id="clientfuilCharges" required
+                    value="{{ request.POST.client_fuilCharge }}">
+            </div>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="clientAddress" class="form-label">Address *</label>
+        <textarea name="address" class="form-control" id="clientAddress" rows="3"
+            required>{{ request.POST.address }}</textarea>
+    </div>
+    <div class="modal-footer">
+        <a href="/showclients" class="btn btn-secondary">Cancel</a> &nbsp;&nbsp;
+        <button type="submit" class="btn btn-primary">Save Client</button>
+    </div>
+</form>
+{% endblock 'main' %}

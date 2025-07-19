@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Billing | Courier Management{% endblock %}
+{% block 'main' %}
+
+<div class="card shadow mb-4">
+    <!-- Page Header -->
+    <div class="row mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-3 px-4">
+            <h2 class="text-dark fw-bold"><i class="fas fa-file-invoice me-2 text-primary"></i>Billing Management</h2>
+            <button class="btn btn btn-outline-primary d-flex align-items-center"  data-bs-toggle="modal" data-bs-target="#createBillModal">
+                <i class="fas fa-plus me-1"></i>Create New Bill
+            </button>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card-body">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Recent Bills</h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead class="table-light text-center">
+                    <tr>
+                        <th>Bill No.</th>
+                        <th>Date</th>
+                        <th>Client</th>
+                        <th>GST</th>
+                        <th>Shipments</th>
+                        <th>Subtotal</th>
+                        <th>GST</th>
+                        <th>Fuel</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bill in bills %}
+                    <tr>
+                        <td>{{ bill.bill_no }}</td>
+                        <td>{{ bill.date|date:"d/m/Y" }}</td>
+                        <td>{{ bill.client.name }}</td>
+                        <td>{{ bill.client.gst_number }}</td>
+                        <td>{{ bill.shipments.count }}</td>
+                        <td>₹{{ bill.subtotal }}</td>
+                        <td>₹{{ bill.gst_amount }}</td>
+                        <td>₹{{ bill.fuel_charge }}</td>
+                        <td><strong>₹{{ bill.total_amount }}</strong></td>
+                        <td class="text-center">
+                            <a href="{% url 'show_bill' bill.id %}" class="btn btn-sm btn-info me-1" title="View Bill">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" class="btn btn-sm btn-secondary me-1" title="Print">
+                                <i class="fas fa-print"></i>
+                            </a>
+                            <a href="#" class="btn btn-sm btn-danger" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center text-muted">No bills found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Create Bill -->
+<div class="modal fade" id="createBillModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <form method="post" action="{% url 'create_bill' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Bill</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form Fields -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Select Client *</label>
+                            <select class="form-select" name="client_id" id="billClient" required>
+                                <option value="">Select Client</option>
+                                {% for client in clients %}
+                                <option value="{{ client.id }}">{{ client.name }} ({{ client.gst_number }})</option>
+                                {% empty %}
+                                <option>No clients found</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bill Date *</label>
+                            <input type="date" class="form-control" name="bill_date" id="billDate" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Bill Period From *</label>
+                            <input type="date" class="form-control" name="period_from" id="billPeriodFrom" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bill Period To *</label>
+                            <input type="date" class="form-control" name="period_to" id="billPeriodTo" required>
+                        </div>
+                    </div>
+
+                    <!-- Shipment List -->
+                    <div class="mb-3">
+                        <label class="form-label">Select Shipments to Include</label>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" id="selectAllShipments"> All</th>
+                                        <th>Date</th>
+                                        <th>Document No.</th>
+                                        <th>Destination</th>
+                                        <th>Service Type</th>
+                                        <th>Cost</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="shipmentTableBody">
+                                    <tr>
+                                        <td colspan="6" class="text-center">Select a client to view shipments</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Fuel & GST Info -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Fuel Surcharge (%)</label>
+                            <input type="text" class="form-control" id="fuelChargeDisplay" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">GST Rate (%)</label>
+                            <select class="form-select" name="gst_rate" id="gstRate">
+                                <option value="18">18% (Standard)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Generate Bill</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+    const clientSelect = document.getElementById('billClient');
+    const shipmentTbody = document.getElementById('shipmentTableBody');
+    const fuelDisplay = document.getElementById('fuelChargeDisplay');
+    const selectAll = document.getElementById('selectAllShipments');
+
+    clientSelect.addEventListener('change', () => {
+        const clientId = clientSelect.value;
+
+        if (!clientId) {
+            shipmentTbody.innerHTML = `<tr><td colspan="6" class="text-center">Select a client to view shipments</td></tr>`;
+            fuelDisplay.value = '';
+            selectAll.checked = false;
+            return;
+        }
+
+        fetch(`/get_shipments_for_client/?client_id=${clientId}`)
+            .then(res => res.json())
+            .then(data => {
+                shipmentTbody.innerHTML = '';
+                if (data.shipments.length === 0) {
+                    shipmentTbody.innerHTML = `<tr><td colspan="6" class="text-center">No available shipments</td></tr>`;
+                    return;
+                }
+
+                data.shipments.forEach(shipment => {
+                    shipmentTbody.innerHTML += `
+                        <tr>
+                            <td><input type="checkbox" name="shipment_ids" value="${shipment.id}" class="shipment-checkbox"></td>
+                            <td>${shipment.date}</td>
+                            <td>${shipment.document_no}</td>
+                            <td>${shipment.destination}</td>
+                            <td>${shipment.service_type}</td>
+                            <td>₹${shipment.cost.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                selectAll.checked = false;
+            });
+
+        fetch(`/get_client_fuel_percent/?client_id=${clientId}`)
+            .then(res => res.json())
+            .then(data => {
+                fuelDisplay.value = data.fuel_percent + " %";
+            }).catch(() => {
+                fuelDisplay.value = "0 %";
+            });
+    });
+
+    selectAll.addEventListener('change', function () {
+        document.querySelectorAll('.shipment-checkbox').forEach(cb => {
+            cb.checked = this.checked;
+        });
+    });
+</script>
+
+{% endblock %}
